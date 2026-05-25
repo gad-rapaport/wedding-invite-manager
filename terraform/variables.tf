@@ -6,4 +6,4 @@ variable "secret_key"     { sensitive = true }
 variable "twilio_sid"     { sensitive = true }
 variable "twilio_token"   { sensitive = true }
 variable "twilio_from"    { default = "whatsapp:+14155238886" }
-variable "openai_key"     { sensitive = true }
+variable "google_ai_key"  { sensitive = true }

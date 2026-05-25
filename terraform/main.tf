@@ -88,7 +88,7 @@ resource "aws_instance" "wedding_server" {
     TWILIO_ACCOUNT_SID=${var.twilio_sid}
     TWILIO_AUTH_TOKEN=${var.twilio_token}
     TWILIO_WHATSAPP_FROM=${var.twilio_from}
-    OPENAI_API_KEY=${var.openai_key}
+    GOOGLE_AI_API_KEY=${var.google_ai_key}
     ENVEOF
 
     # Start the application

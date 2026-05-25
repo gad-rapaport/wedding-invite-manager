@@ -15,7 +15,7 @@ class Config:
         "TWILIO_WHATSAPP_FROM", "whatsapp:+14155238886"
     )
 
-    OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+    GOOGLE_AI_API_KEY = os.environ.get("GOOGLE_AI_API_KEY", "")
 
     UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "static", "uploads")
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max upload
