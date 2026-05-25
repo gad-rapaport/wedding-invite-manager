@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}אורחים{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">👥 רשימת אורחים</h1>
+  <a href="{{ url_for('ui.add_guest') }}" class="btn btn-primary">➕ הוסף אורח</a>
+</div>
+
+<form method="GET" class="filter-bar">
+  <select name="group">
+    <option value="">כל הקבוצות</option>
+    <option value="family" {% if group == 'family' %}selected{% endif %}>משפחה</option>
+    <option value="friends" {% if group == 'friends' %}selected{% endif %}>חברים</option>
+    <option value="work" {% if group == 'work' %}selected{% endif %}>עבודה</option>
+  </select>
+  <select name="status">
+    <option value="">כל הסטטוסים</option>
+    <option value="invited" {% if status == 'invited' %}selected{% endif %}>הוזמנו</option>
+    <option value="not_invited" {% if status == 'not_invited' %}selected{% endif %}>לא הוזמנו</option>
+    <option value="reminded" {% if status == 'reminded' %}selected{% endif %}>קיבלו תזכורת</option>
+  </select>
+  <select name="sort">
+    <option value="name" {% if sort == 'name' %}selected{% endif %}>מיין לפי שם</option>
+    <option value="group" {% if sort == 'group' %}selected{% endif %}>מיין לפי קבוצה</option>
+    <option value="created" {% if sort == 'created' %}selected{% endif %}>מיין לפי תאריך הוספה</option>
+  </select>
+  <button type="submit" class="btn btn-secondary">סנן</button>
+</form>
+
+<div class="table-wrapper">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>שם</th>
+        <th>טלפון</th>
+        <th>קבוצה</th>
+        <th>הזמנה</th>
+        <th>תזכורת</th>
+        <th>הערות</th>
+        <th>פעולות</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for g in guests %}
+      <tr>
+        <td>{{ g.name }}</td>
+        <td dir="ltr">{{ g.phone }}</td>
+        <td><span class="badge badge-{{ g.group_name }}">{{ g.group_name or '—' }}</span></td>
+        <td>
+          {% if g.invitation_sent %}
+            <span class="badge badge-success">✅ נשלח</span>
+          {% else %}
+            <span class="badge badge-pending">⏳ ממתין</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if g.reminder_sent %}
+            <span class="badge badge-success">✅ נשלח</span>
+          {% else %}
+            <span class="badge badge-pending">—</span>
+          {% endif %}
+        </td>
+        <td>{{ g.notes or '—' }}</td>
+        <td class="actions">
+          <a href="{{ url_for('ui.edit_guest', guest_id=g.id) }}" class="btn btn-sm btn-secondary">עריכה</a>
+          <form method="POST" action="{{ url_for('ui.delete_guest', guest_id=g.id) }}"
+                onsubmit="return confirm('למחוק את {{ g.name }}?')">
+            <button type="submit" class="btn btn-sm btn-danger">מחק</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="empty">אין אורחים להצגה</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

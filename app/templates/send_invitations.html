@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}שליחת הזמנות{% endblock %}
+
+{% block content %}
+<h1 class="page-title">📤 שליחת הזמנות ותזכורות</h1>
+
+{% if not event %}
+<div class="alert alert-warning">יש להגדיר את פרטי האירוע תחילה. <a href="{{ url_for('ui.event_settings') }}">לחץ כאן</a></div>
+{% else %}
+
+<div class="send-section">
+  <h2>📨 שליחת הזמנות ({{ uninvited|length }} לא הוזמנו עדיין)</h2>
+  <form method="POST">
+    <input type="hidden" name="action" value="invitations" />
+    <div class="guest-checklist">
+      {% for g in uninvited %}
+      <label class="check-item">
+        <input type="checkbox" name="guest_ids" value="{{ g.id }}" checked />
+        {{ g.name }} ({{ g.group_name }}) — <span dir="ltr">{{ g.phone }}</span>
+      </label>
+      {% else %}
+      <p class="empty">כל האורחים כבר קיבלו הזמנה ✅</p>
+      {% endfor %}
+    </div>
+    {% if uninvited %}
+    <button type="submit" class="btn btn-primary">
+      שלח הזמנות לנבחרים עם AI ✨
+    </button>
+    {% endif %}
+  </form>
+</div>
+
+<hr class="divider" />
+
+<div class="send-section">
+  <h2>🔔 שליחת תזכורות ({{ not_reminded|length }} טרם קיבלו)</h2>
+  <form method="POST">
+    <input type="hidden" name="action" value="reminders" />
+    <div class="guest-checklist">
+      {% for g in not_reminded %}
+      <label class="check-item">
+        <input type="checkbox" name="guest_ids" value="{{ g.id }}" checked />
+        {{ g.name }} ({{ g.group_name }}) — <span dir="ltr">{{ g.phone }}</span>
+      </label>
+      {% else %}
+      <p class="empty">כל האורחים שהוזמנו כבר קיבלו תזכורת ✅</p>
+      {% endfor %}
+    </div>
+    {% if not_reminded %}
+    <button type="submit" class="btn btn-success">
+      שלח תזכורות לנבחרים עם AI ✨
+    </button>
+    {% endif %}
+  </form>
+</div>
+
+{% endif %}
+{% endblock %}

@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+*.db
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+terraform.tfvars

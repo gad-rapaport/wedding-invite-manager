@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ action }} אורח{% endblock %}
+
+{% block content %}
+<h1 class="page-title">{{ action }} אורח</h1>
+
+<form method="POST" class="form-card">
+  <div class="form-group">
+    <label for="name">שם מלא *</label>
+    <input type="text" id="name" name="name" required
+           value="{{ guest.name if guest else '' }}" placeholder="ישראל ישראלי" />
+  </div>
+  <div class="form-group">
+    <label for="phone">מספר טלפון (עם קידומת מדינה) *</label>
+    <input type="text" id="phone" name="phone" required dir="ltr"
+           value="{{ guest.phone if guest else '' }}" placeholder="+972501234567" />
+  </div>
+  <div class="form-group">
+    <label for="group_name">קבוצה</label>
+    <select id="group_name" name="group_name">
+      <option value="friends" {% if guest and guest.group_name == 'friends' %}selected{% endif %}>חברים</option>
+      <option value="family" {% if guest and guest.group_name == 'family' %}selected{% endif %}>משפחה</option>
+      <option value="work" {% if guest and guest.group_name == 'work' %}selected{% endif %}>עבודה</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label for="notes">הערות</label>
+    <textarea id="notes" name="notes" rows="3">{{ guest.notes if guest else '' }}</textarea>
+  </div>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">{{ action }}</button>
+    <a href="{{ url_for('ui.guests') }}" class="btn btn-secondary">ביטול</a>
+  </div>
+</form>
+{% endblock %}
