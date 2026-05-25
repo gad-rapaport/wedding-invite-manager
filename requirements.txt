@@ -3,7 +3,6 @@ flask-sqlalchemy==3.1.1
 pymysql==1.1.1
 cryptography==42.0.8
 gunicorn==22.0.0
-twilio==9.2.3
 google-generativeai==0.8.3
 prometheus-flask-exporter==0.23.1
 python-dotenv==1.0.1

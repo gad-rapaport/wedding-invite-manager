@@ -8,9 +8,6 @@ services:
     environment:
       DATABASE_URL: mysql+pymysql://wedding_user:wedding_pass@mysql:3306/wedding_db
       SECRET_KEY: ${SECRET_KEY}
-      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
-      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
-      TWILIO_WHATSAPP_FROM: ${TWILIO_WHATSAPP_FROM}
       GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
     depends_on:
       mysql:

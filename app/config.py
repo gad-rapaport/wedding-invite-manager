@@ -9,12 +9,6 @@ class Config:
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID", "")
-    TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN", "")
-    TWILIO_WHATSAPP_FROM = os.environ.get(
-        "TWILIO_WHATSAPP_FROM", "whatsapp:+14155238886"
-    )
-
     GOOGLE_AI_API_KEY = os.environ.get("GOOGLE_AI_API_KEY", "")
 
     UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "static", "uploads")
