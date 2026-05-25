@@ -3,8 +3,12 @@ from flask import current_app
 
 
 def _format_phone(phone: str) -> str:
-    """Convert +972XXXXXXXXX → 972XXXXXXXXX@c.us (Green API format)."""
+    """Convert any Israeli format → 972XXXXXXXXX@c.us (Green API format).
+    Handles: +972..., 972..., 05...
+    """
     cleaned = phone.strip().replace("+", "").replace("-", "").replace(" ", "")
+    if cleaned.startswith("0"):
+        cleaned = "972" + cleaned[1:]  # 052... → 97252...
     return f"{cleaned}@c.us"
 
 
