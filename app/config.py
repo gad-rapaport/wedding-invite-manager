@@ -9,6 +9,9 @@ class Config:
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    GREEN_API_INSTANCE_ID = os.environ.get("GREEN_API_INSTANCE_ID", "")
+    GREEN_API_TOKEN = os.environ.get("GREEN_API_TOKEN", "")
+
     GOOGLE_AI_API_KEY = os.environ.get("GOOGLE_AI_API_KEY", "")
 
     UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "static", "uploads")

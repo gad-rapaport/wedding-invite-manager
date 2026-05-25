@@ -8,6 +8,8 @@ services:
     environment:
       DATABASE_URL: mysql+pymysql://wedding_user:wedding_pass@mysql:3306/wedding_db
       SECRET_KEY: ${SECRET_KEY}
+      GREEN_API_INSTANCE_ID: ${GREEN_API_INSTANCE_ID}
+      GREEN_API_TOKEN: ${GREEN_API_TOKEN}
       GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
     depends_on:
       mysql:
