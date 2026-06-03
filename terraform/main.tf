@@ -1,100 +1,83 @@
 terraform {
   required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
+    hcloud = {
+      source  = "hetznercloud/hcloud"
+      version = "~> 1.45"
     }
   }
 }
 
-provider "aws" {
-  region = var.aws_region
+provider "hcloud" {
+  token = var.hcloud_token
 }
 
-# ── Security Group ────────────────────────────────────────────────────────────
-resource "aws_security_group" "wedding_sg" {
-  name        = "wedding-invite-sg"
-  description = "Allow HTTP, HTTPS and SSH"
-
-  ingress {
-    description = "SSH"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "HTTP"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "Grafana"
-    from_port   = 3000
-    to_port     = 3000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = { Name = "wedding-invite-sg" }
+# ── SSH Key ───────────────────────────────────────────────────────────────────
+resource "hcloud_ssh_key" "wedding_key" {
+  name       = "wedding-invite-key"
+  public_key = var.ssh_public_key
 }
 
-# ── EC2 Instance ──────────────────────────────────────────────────────────────
-resource "aws_instance" "wedding_server" {
-  ami                    = var.ami_id          # Amazon Linux 2023
-  instance_type          = "t2.micro"          # Free tier
-  key_name               = var.key_pair_name
-  vpc_security_group_ids = [aws_security_group.wedding_sg.id]
+# ── Firewall ──────────────────────────────────────────────────────────────────
+resource "hcloud_firewall" "wedding_fw" {
+  name = "wedding-invite-fw"
+
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "22"
+    source_ips = ["0.0.0.0/0", "::/0"]
+  }
+
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "80"
+    source_ips = ["0.0.0.0/0", "::/0"]
+  }
+
+  rule {
+    direction  = "in"
+    protocol   = "tcp"
+    port       = "3000"
+    source_ips = ["0.0.0.0/0", "::/0"]
+  }
+}
+
+# ── Server ────────────────────────────────────────────────────────────────────
+resource "hcloud_server" "wedding_server" {
+  name         = "wedding-invite-server"
+  image        = "ubuntu-22.04"
+  server_type  = var.server_type
+  location     = var.location
+  ssh_keys     = [hcloud_ssh_key.wedding_key.id]
+  firewall_ids = [hcloud_firewall.wedding_fw.id]
 
   user_data = <<-EOF
     #!/bin/bash
     set -e
 
-    # Update system
-    yum update -y
+    apt-get update -y
+    apt-get install -y docker.io docker-compose git
 
-    # Install Docker
-    yum install -y docker git
     systemctl enable docker
     systemctl start docker
 
-    # Install Docker Compose
-    curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \
-      -o /usr/local/bin/docker-compose
-    chmod +x /usr/local/bin/docker-compose
-
-    # Add ec2-user to docker group
-    usermod -aG docker ec2-user
-
     # Clone the project
-    cd /home/ec2-user
+    cd /root
     git clone https://github.com/${var.github_repo} wedding-invite-manager
     cd wedding-invite-manager
 
-    # Create .env file from environment
+    # Create .env file
     cat > .env <<ENVEOF
-    SECRET_KEY=${var.secret_key}
-    GREEN_API_INSTANCE_ID=${var.green_api_instance_id}
-    GREEN_API_TOKEN=${var.green_api_token}
-    GOOGLE_AI_API_KEY=${var.google_ai_key}
-    ENVEOF
+SECRET_KEY=${var.secret_key}
+GREEN_API_INSTANCE_ID=${var.green_api_instance_id}
+GREEN_API_TOKEN=${var.green_api_token}
+GOOGLE_AI_API_KEY=${var.google_ai_key}
+NGINX_PORT=80
+ENVEOF
 
-    # Start the application
     docker-compose up -d
 
-    echo "Wedding Invite Manager started!" > /home/ec2-user/startup.log
+    echo "Wedding Invite Manager started on Hetzner!" > /root/startup.log
   EOF
-
-  tags = { Name = "wedding-invite-server" }
 }

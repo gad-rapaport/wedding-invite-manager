@@ -127,7 +127,7 @@ git push → main
     ├─ Stage 2: docker build + push to Docker Hub
     │       (tagged: latest + SHA)
     │
-    └─ Stage 3: SSH לEC2 → git pull + docker-compose up -d
+    └─ Stage 3: SSH לHetzner → git pull + docker-compose up -d
 ```
 
 ### Secrets הנדרשים ב-GitHub
@@ -136,23 +136,23 @@ git push → main
 |--------|-------|
 | `DOCKER_USERNAME` | שם משתמש Docker Hub |
 | `DOCKER_PASSWORD` | סיסמת Docker Hub |
-| `EC2_HOST` | כתובת IP של שרת EC2 |
-| `EC2_SSH_KEY` | מפתח SSH פרטי |
+| `SERVER_HOST` | כתובת IP של שרת Hetzner |
+| `SERVER_SSH_KEY` | מפתח SSH פרטי |
 | `MAIL_USERNAME` | כתובת Gmail לשליחת התראות |
 | `MAIL_PASSWORD` | App Password של Gmail |
 | `MAIL_TO` | כתובת יעד לקבלת התראות |
 
 ---
 
-## פריסה בענן — AWS EC2 עם Terraform
+## פריסה בענן — Hetzner Cloud עם Terraform
 
 ```bash
 cd terraform
 
-# הגדר משתנים
 terraform init
 terraform apply \
-  -var="key_pair_name=my-key" \
+  -var="hcloud_token=YOUR_HETZNER_API_TOKEN" \
+  -var="ssh_public_key=$(cat ~/.ssh/id_rsa.pub)" \
   -var="github_repo=user/wedding-invite-manager" \
   -var="secret_key=strong-secret" \
   -var="green_api_instance_id=XXXXX" \
@@ -161,9 +161,13 @@ terraform apply \
 ```
 
 Terraform מקים:
-- EC2 t2.micro (Free Tier) עם Amazon Linux 2023
-- Security Group (ports 22, 80, 3000)
-- Bash user-data script שמתקין Docker ומעלה את האפליקציה אוטומטית
+- Hetzner CX22 (2 vCPU / 4 GB RAM) עם Ubuntu 22.04
+- Firewall (ports 22, 80, 3000)
+- SSH Key
+- Bash user-data script שמתקין Docker ומעלה את האפליקציה על פורט 80 אוטומטית
+
+> **פורט:** בשרת Hetzner האפליקציה רצה על פורט **80** (מוגדר דרך `NGINX_PORT=80` ב-.env).
+> בסביבה מקומית: `http://localhost:8080` (ברירת מחדל ללא NGINX_PORT).
 
 ---
 
@@ -195,10 +199,12 @@ wedding-invite-manager/
 
 ## שינויים אחרונים
 
-### גרסה נוכחית
+### גרסה נוכחית — Hetzner
 - **Green API במקום Twilio** — עבר ל-Green API לשליחת WhatsApp אמיתית בישראל; פורמט הטלפון מותאם (05x → 9725x@c.us)
 - **Google Gemini במקום OpenAI** — מודל `gemini-2.0-flash` ליצירת הודעות עברית אישיות
 - **Nginx על פורט 8080** — בסביבת dev המקומית; בEC2 רץ על פורט 80 ישירות
 - **תיקון Terraform** — משתני `twilio_*` הוחלפו ב-`green_api_instance_id` ו-`green_api_token`
 - **תיקון conftest.py** — TEST_CONFIG מכיל את המשתנים הנכונים (GREEN_API / GOOGLE_AI)
 - **CI שולח email על כישלון** — via dawidd6/action-send-mail עם Gmail SMTP
+- **מעבר מ-AWS EC2 ל-Hetzner Cloud** — Terraform עם `hcloud` provider; שרת `cx22` Ubuntu 22.04; SSH user: `root`; secrets שונו מ-`EC2_HOST/EC2_SSH_KEY` ל-`SERVER_HOST/SERVER_SSH_KEY`
+- **פורט Nginx דינמי** — `${NGINX_PORT:-8080}:80`; הגדר `NGINX_PORT=80` ב-.env בשרת להפעלה על פורט 80

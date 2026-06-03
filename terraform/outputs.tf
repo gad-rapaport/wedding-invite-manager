@@ -1,12 +1,12 @@
 output "server_ip" {
-  value       = aws_instance.wedding_server.public_ip
-  description = "EC2 public IP — open this in the browser"
+  value       = hcloud_server.wedding_server.ipv4_address
+  description = "Hetzner server public IP — open this in the browser"
 }
 
 output "app_url" {
-  value = "http://${aws_instance.wedding_server.public_ip}"
+  value = "http://${hcloud_server.wedding_server.ipv4_address}"
 }
 
 output "grafana_url" {
-  value = "http://${aws_instance.wedding_server.public_ip}:3000"
+  value = "http://${hcloud_server.wedding_server.ipv4_address}:3000"
 }

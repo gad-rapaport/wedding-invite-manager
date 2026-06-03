@@ -72,9 +72,9 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
             ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-  # ── Stage 3: Deploy to AWS EC2 ────────────────────────────────────────────
+  # ── Stage 3: Deploy to Hetzner ────────────────────────────────────────────
   deploy:
-    name: Deploy to EC2
+    name: Deploy to Hetzner
     needs: build-and-push
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -85,11 +85,11 @@ jobs:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ec2-user
-          key: ${{ secrets.EC2_SSH_KEY }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: root
+          key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd /home/ec2-user/wedding-invite-manager
+            cd /root/wedding-invite-manager
 
             # Pull latest code
             git pull origin main
