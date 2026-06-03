@@ -5,9 +5,9 @@ TEST_CONFIG = {
     "TESTING": True,
     "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
     "SECRET_KEY": "test-secret",
-    "TWILIO_ACCOUNT_SID": "",
-    "TWILIO_AUTH_TOKEN": "",
-    "OPENAI_API_KEY": "",
+    "GREEN_API_INSTANCE_ID": "",
+    "GREEN_API_TOKEN": "",
+    "GOOGLE_AI_API_KEY": "",
 }
 
 

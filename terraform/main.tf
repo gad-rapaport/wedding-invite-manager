@@ -85,9 +85,8 @@ resource "aws_instance" "wedding_server" {
     # Create .env file from environment
     cat > .env <<ENVEOF
     SECRET_KEY=${var.secret_key}
-    TWILIO_ACCOUNT_SID=${var.twilio_sid}
-    TWILIO_AUTH_TOKEN=${var.twilio_token}
-    TWILIO_WHATSAPP_FROM=${var.twilio_from}
+    GREEN_API_INSTANCE_ID=${var.green_api_instance_id}
+    GREEN_API_TOKEN=${var.green_api_token}
     GOOGLE_AI_API_KEY=${var.google_ai_key}
     ENVEOF
 
