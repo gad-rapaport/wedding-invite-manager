@@ -27,25 +27,25 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run tests
-        run: pytest tests/ -v
+        run: PYTHONPATH=. pytest tests/ -v
 
       - name: Send failure email
         if: failure()
+        continue-on-error: true          # אם ה-MAIL secrets לא מוגדרים — לא קורס
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
           server_port: 587
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          subject: "❌ CI נכשל — ${{ github.repository }} @ ${{ github.ref_name }}"
+          subject: "CI failed — ${{ github.repository }} @ ${{ github.ref_name }}"
           to: ${{ secrets.MAIL_TO }}
           from: ${{ secrets.MAIL_USERNAME }}
           body: |
-            הפייפליין נכשל ב-commit: ${{ github.sha }}
+            Pipeline failed on commit: ${{ github.sha }}
             Branch: ${{ github.ref_name }}
-            מי דחף: ${{ github.actor }}
-
-            בדוק את הלוגים: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Pushed by: ${{ github.actor }}
+            Logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
   # ── Stage 2: Build & Push Docker image ────────────────────────────────────
   build-and-push:
@@ -80,8 +80,6 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
-      - uses: actions/checkout@v4
-
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -89,6 +87,13 @@ jobs:
           username: root
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+            set -e
+
+            # Clone project if first deploy
+            if [ ! -d /root/wedding-invite-manager ]; then
+              git clone https://github.com/${{ github.repository }} /root/wedding-invite-manager
+            fi
+
             cd /root/wedding-invite-manager
 
             # Pull latest code
@@ -97,8 +102,13 @@ jobs:
             # Pull latest Docker image
             docker pull ${{ secrets.DOCKER_USERNAME }}/wedding-invite-manager:latest
 
-            # Restart with new image (zero-downtime rolling)
-            docker-compose pull
-            docker-compose up -d --no-deps --build app
+            # docker compose v2 (plugin) — fallback to docker-compose v1
+            if docker compose version &>/dev/null 2>&1; then
+              docker compose pull
+              docker compose up -d --no-deps app
+            else
+              docker-compose pull
+              docker-compose up -d --no-deps app
+            fi
 
-            echo "✅ Deployed successfully at $(date)"
+            echo "Deployed successfully at $(date)"
